@@ -1,0 +1,9 @@
+https://learnopengl.com/Getting-started/Camera - Some code for camera vectors comes from here, specifically used for rotation/strafing.
+https://stackoverflow.com/questions/573084/how-to-calculate-bounce-angle - Used for help with math on bouncing particles against walls.
+https://developer.mozilla.org/en-US/docs/Games/Techniques/2D_collision_detection - collision checking for circles based from here (simple math)
+https://en.wikipedia.org/wiki/Rotation_matrix - generalized form of rotation matrix used for rotating camera (and other objects like lights) around the scene/around arbitrary axis.
+
+https://stackoverflow.com/questions/874134/find-out-if-string-ends-with-another-string-in-c - function to find if a string ends with another string
+
+https://github.com/syoyo/tinyobjloader - open-source library for loading obj files efficiently
+https://github.com/cxong/tinydir - open-source cross-platform library for iterating over files in a directory (which is somehow not provided in c++ at all until c++17??)
