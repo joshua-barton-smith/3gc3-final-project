@@ -43,8 +43,10 @@ int screen_height = 600;
 // movement inputs
 bool movement[] = {false, false, false, false};
 
-// map of obj file names to Meshes
-std::map<std::string, Mesh> meshes;
+// map of obj file names to Mesh pointers
+// the Mesh ptr should be passed through to the actual game object
+// so it can render itself
+std::map<std::string, Mesh*> meshes;
 // couple of lights
 Light l;
 Light l1;
@@ -180,7 +182,7 @@ void display()
     l.render();
 
     // draw a mesh
-    meshes["kanga2.obj"].render();
+    meshes["kanga2.obj"]->render();
 
     // draw a 2d HUD
     drawHUD();
@@ -207,6 +209,7 @@ void FPS(int val)
     glutTimerFunc(17, FPS, val);
 }
 
+// utility function from stackoverflow, checks if a string ends with another string.
 bool endswith (std::string const &fullString, std::string const &ending) {
     if (fullString.length() >= ending.length()) {
         return (0 == fullString.compare (fullString.length() - ending.length(), ending.length(), ending));
@@ -255,7 +258,7 @@ void loadModels() {
             }
 
             // store the loaded model into a Mesh class
-            meshes.insert(std::pair<std::string, Mesh>(s, Mesh(attrib, shapes, materials)));
+            meshes.insert(std::pair<std::string, Mesh*>(s, new Mesh(attrib, shapes, materials)));
         }
 
         // get next file in the directory
