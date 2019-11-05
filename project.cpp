@@ -20,6 +20,7 @@
 #include "mathLib3D.h"
 #include "camera.h"
 #include "light.h"
+#include "game_object.h"
 
 #include "mesh.h"
 #include <vector>
@@ -47,6 +48,8 @@ bool movement[] = {false, false, false, false};
 // the Mesh ptr should be passed through to the actual game object
 // so it can render itself
 std::map<std::string, Mesh*> meshes;
+// a list of all GameObjects which can be drawn in the scene, moved, interacted with, etc
+std::vector<GameObject> objs;
 // couple of lights
 Light l;
 Light l1;
@@ -182,7 +185,9 @@ void display()
     l.render();
 
     // draw a mesh
-    meshes["kanga2.obj"]->render();
+    for (int i = 0; i < objs.size(); i++) {
+        objs[i].render();
+    }
 
     // draw a 2d HUD
     drawHUD();
@@ -276,6 +281,8 @@ int main(int argc, char** argv)
     // so it doesn't appear frozen
     loadModels();
 
+    objs.push_back(GameObject(meshes["kanga2.obj"], Point3D(0, 0, 0), Point3D(-90, 0, 0), 0.2));
+
     // glut initialization stuff
     glutInit(&argc, argv);
     glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
@@ -290,20 +297,13 @@ int main(int argc, char** argv)
     glClearColor(0.0, 0.0, 0.0, 1.0);
 
     // light properties
-    Vec3D lp = Vec3D::createVector(Point3D(0, 0, 0), Point3D(-200, 100, 200));
-    float pos[4] = {lp.mX, lp.mY, lp.mZ, 1};
-    float pos2[4] = {-49.0, 206.0, -136.0, 1};
+    float pos[4] = {-100, 100, -30, 1};
 
     float amb[4] = {0.3, 0.3, 0.3, 1.0};
     float diff[4] = {0.7, 0.7, 0.7, 1.0};
     float spec[4] = {1.0, 1.0, 1.0, 1.0};
 
-    float amb2[4] = {0.3, 0.3, 0.3, 1.0};
-    float diff2[4] = {0.5, 0.5, 0.5, 1.0};
-    float spec2[4] = {0.7, 0.7, 0.7, 1.0};
-
     l = Light(GL_LIGHT0, pos, amb, diff, spec, false);
-    l1 = Light(GL_LIGHT1, pos2, amb2, diff2, spec2, false);
 
     glEnable(GL_LIGHTING);
 
