@@ -1,0 +1,16 @@
+# Blender MTL File: 'None'
+# Material Count: 1
+
+newmtl Material_#0
+Ns 18.000005
+Ka 1.000000 1.000000 1.000000
+Kd 0.588000 0.588000 0.588000
+Ks 0.860000 0.860000 0.860000
+Ke 0.0 0.0 0.0
+Ni 1.450000
+d 1.000000
+illum 3
+map_Kd C:\\Users\\ziddi\\Downloads\\bed\\source\\Bed_1\\Textures\\Bed_Diffuse.png
+map_Ks -o 0.487300 0.487300 0.000000 -s 39.370079 39.370079 1.000000 C:\\Users\\ziddi\\Downloads\\bed\\source\\Bed_1\\Textures\\Bed_Spec.png
+map_d C:\\Users\\ziddi\\Downloads\\bed\\source\\Bed_1\\Textures\\Bed_Diffuse.png
+refl Map #2

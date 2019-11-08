@@ -29,7 +29,7 @@ Camera::Camera(Vec3D camPos, Vec3D camTgt) {
 	this->camUp = camDir.cross(camRight);
 
 	// front of the camera (where it is pointing to/looking)
-	this->camFront = Vec3D(0.0, 0.0, -1.0);
+	this->camFront = Vec3D(camDir.mX, camDir.mY, camDir.mZ).normalize();
 
 	// angles of rotation
 	this->pitch = 0.0;
@@ -41,7 +41,7 @@ Camera::Camera(Vec3D camPos, Vec3D camTgt) {
 	this->rotSpeed = 0.7;
 
 	// sensitivity default value
-	this->sens = 0.03;
+	this->sens = 0.06;
 }
 
 /**

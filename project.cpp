@@ -35,7 +35,7 @@
 #include <iterator>
 
 // the two Vec3D represent the eye position and the lookAt position
-Camera camera = Camera(Vec3D(-100.0, 30.0, 0.0), Vec3D(0.0, 0.0, -5.0));
+Camera camera = Camera(Vec3D(0.0, 0.0, 20.0), Vec3D(0.0, 0.0, -5.0));
 
 // width and height of the screen.
 int screen_width = 600;
@@ -185,7 +185,7 @@ void display()
     l.render();
 
     // draw a mesh
-    for (int i = 0; i < objs.size(); i++) {
+    for (size_t i = 0; i < objs.size(); i++) {
         objs[i].render();
     }
 
@@ -281,7 +281,8 @@ int main(int argc, char** argv)
     // so it doesn't appear frozen
     loadModels();
 
-    objs.push_back(GameObject(meshes["kanga2.obj"], Point3D(0, 0, 0), Point3D(-90, 0, 0), 0.2));
+    // this is just done to display an object, we should be instead loading a scene.
+    objs.push_back(GameObject(meshes["bed.obj"], Point3D(0, 0, 0), Point3D(0, 0, 0), 10.0));
 
     // glut initialization stuff
     glutInit(&argc, argv);
