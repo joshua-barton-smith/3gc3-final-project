@@ -6,13 +6,15 @@
 
 class GameObject {
 public:
-	GameObject(Mesh *mesh, Point3D position, Point3D rotation, float scale);
+	GameObject(Mesh *mesh, Point3D position, Point3D rotation, float scale, bool random);
 
 	void render();
 
 	Point3D position;
 	Point3D rotation;
 	float scale;
+
+	bool random;
 
 	Mesh *mesh;
 };

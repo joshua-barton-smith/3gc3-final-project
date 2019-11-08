@@ -21,6 +21,10 @@ https://github.com/cxong/tinydir - open-source cross-platform library for iterat
 ## Model sources
 https://sketchfab.com/3d-models/bed-403c4a48e5ea4a9fbbb9a096d90973af - bed.obj and related files
 https://sketchfab.com/3d-models/socks-3d79cc9684bd4c6094e1c0778e334ce4 - Sock.obj and related files
+https://sketchfab.com/3d-models/desk-36e27887358e45d3b400d4c4dd7ac7a8 - desk.obj
+https://sketchfab.com/3d-models/desktop-computer-561abc2fc95941609fc7bc6f232895c2 - computer.obj
+https://sketchfab.com/3d-models/computer-c0841dac3a424579ac91dee5a7ad4b76 - tower.obj
 
 All models downloaded are licensed under CC - https://creativecommons.org/licenses/by/4.0/
 All models were ran through Blender for triangulation
+A couple models had their poly count reduced through Blender for performance

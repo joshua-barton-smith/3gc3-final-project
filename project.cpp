@@ -35,11 +35,13 @@
 #include <iterator>
 
 // the two Vec3D represent the eye position and the lookAt position
-Camera camera = Camera(Vec3D(0.0, 0.0, 20.0), Vec3D(0.0, 0.0, -5.0));
+Camera camera = Camera(Vec3D(0.0, 0.0, 0.0), Vec3D(1.0, 0.0, 0.0));
 
 // width and height of the screen.
 int screen_width = 600;
 int screen_height = 600;
+
+int timer = 60 * 60 * 10;
 
 // movement inputs
 bool movement[] = {false, false, false, false};
@@ -142,6 +144,7 @@ void drawHUD() {
     std::stringstream stream;
     stream << "(" << camera.camPos.mX << "," << camera.camPos.mY << "," << camera.camPos.mZ << ")" << std::endl;
     stream << "angles: " << camera.pitch << "," << camera.yaw << std::endl;
+    stream << "timer: " << (timer / 60.0) << std::endl;
 
     std::string output = stream.str();
 
@@ -168,6 +171,12 @@ void motion(int x, int y)
     camera.updateRotation(xoff, yoff);
 
     glutWarpPointer(((int)screen_width / 2), ((int)screen_height / 2));
+}
+
+void drawWalls() {
+    glBegin (GL_QUADS);
+
+    glEnd();
 }
 
 /**
@@ -210,8 +219,13 @@ void FPS(int val)
         }
     }
 
+    timer--;
+
     glutPostRedisplay();
     glutTimerFunc(17, FPS, val);
+}
+
+void loadScenes() {
 }
 
 // utility function from stackoverflow, checks if a string ends with another string.
@@ -276,13 +290,32 @@ void loadModels() {
 
 int main(int argc, char** argv)
 {
+    // we want to display a menu before showing a scene so that user can select the scene to play
+    // just show a list of options and press a key to select - PROTOTYPE
+
+    // guess number or timer (done) or both needs to be added
+    // guess number - not until we have a way to check what they're guessing
+
     srand(time(NULL));
     // load models - do this before creating window
     // so it doesn't appear frozen
     loadModels();
 
+    loadScenes();
+
     // this is just done to display an object, we should be instead loading a scene.
-    objs.push_back(GameObject(meshes["bed.obj"], Point3D(0, 0, 0), Point3D(0, 0, 0), 10.0));
+    objs.push_back(GameObject(meshes["bed.obj"], Point3D(5, 0, 5), Point3D(0, -90, 0), 1.0, false));
+    objs.push_back(GameObject(meshes["desk.obj"], Point3D(5, 0, -5), Point3D(0, 0, 0), 1.0, false));
+    objs.push_back(GameObject(meshes["computer.obj"], Point3D(5, 1, -5.18), Point3D(0, -90, 0), 25.0, false));
+    objs.push_back(GameObject(meshes["tower.obj"], Point3D(5.1, 0.83, -5.55), Point3D(0, -90, 0), 0.0075, false));
+
+    // randomize 1 ID for what object should be the random item that is the goal - PROTOTYPE
+    // objects take random position in the scene. - PROTOTYPE
+    // objects can take random size, similar objects with different sizes. - PROTOTYPE
+
+    // allow objects to be duplicated some number of times in the scene when it's generated - PROTOTYPE
+
+    // provide user with a hint if they pick the wrong object. make comparison with name, size, etc. of the target
 
     // glut initialization stuff
     glutInit(&argc, argv);

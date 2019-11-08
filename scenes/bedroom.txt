@@ -1,0 +1,5 @@
+bed.obj fixed 50 0 50 0 -90 0 10
+desk.obj fixed 50 0 -50 0 0 0 20
+computer.obj fixed 50 20 -50 0 -90 0 500
+tower.obj fixed 50 0 -45 0 0 0 10
+sock.obj random

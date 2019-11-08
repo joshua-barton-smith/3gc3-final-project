@@ -12,11 +12,14 @@
 #include "mathLib3D.h"
 #include "mesh.h"
 
-GameObject::GameObject(Mesh *mesh, Point3D position, Point3D rotation, float scale) {
+// need a way to find size of the object for checking what object is being interacted with
+// we can check within a range of the object so it doesnt have to be super precise.
+GameObject::GameObject(Mesh *mesh, Point3D position, Point3D rotation, float scale, bool random) {
 	this->mesh = mesh;
 	this->position = position;
 	this->rotation = rotation;
 	this->scale = scale;
+	this->random = random;
 }
 
 void GameObject::render() {
