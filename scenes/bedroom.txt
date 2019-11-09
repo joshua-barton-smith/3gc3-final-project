@@ -1,5 +1,10 @@
-bed.obj fixed 50 0 50 0 -90 0 10
-desk.obj fixed 50 0 -50 0 0 0 20
-computer.obj fixed 50 20 -50 0 -90 0 500
-tower.obj fixed 50 0 -45 0 0 0 10
-sock.obj random
+# light setup: (light number) (pos x, y, z) (ambient x, y, z) (diffuse x, y, z) (specular x, y, z)
+light 0 2.5 3.5 5.5 0.3 0.3 0.3 0.7 0.7 0.7 1.0 1.0 1.0
+
+# fixed-object setup: (obj name) fixed (pos x, y, z) (rotation x, y, z) (scale)
+bed.obj fixed 5 0 5 0 -90 0 1
+desk.obj fixed 5 0 -5 0 0 0 1
+computer.obj fixed 5 1 -5.18 0 -90 0 25
+tower.obj fixed 5.1 0.83 -5.55 0 -90 0 0.0075
+# random-object setup: (obj name) random (base scale) (max generated)
+Sock.obj random 0.1 4

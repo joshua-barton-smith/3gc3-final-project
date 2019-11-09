@@ -21,6 +21,7 @@
 #include "camera.h"
 #include "light.h"
 #include "game_object.h"
+#include "scene.h"
 
 #include "mesh.h"
 #include <vector>
@@ -50,11 +51,8 @@ bool movement[] = {false, false, false, false};
 // the Mesh ptr should be passed through to the actual game object
 // so it can render itself
 std::map<std::string, Mesh*> meshes;
-// a list of all GameObjects which can be drawn in the scene, moved, interacted with, etc
-std::vector<GameObject> objs;
-// couple of lights
-Light l;
-Light l1;
+// a map of all available scenes
+std::map<std::string, Scene> scenes;
 
 /**
 * Handles regular keyboard inputs (e.g. w/s/a/d for movement)
@@ -190,13 +188,8 @@ void display()
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     camera.lookAt();
 
-    // draw a light/bind its properties to light the scene
-    l.render();
-
-    // draw a mesh
-    for (size_t i = 0; i < objs.size(); i++) {
-        objs[i].render();
-    }
+    // render the scene, this includes all objects and lights making up the scene
+    scenes["bedroom"].render();
 
     // draw a 2d HUD
     drawHUD();
@@ -225,9 +218,6 @@ void FPS(int val)
     glutTimerFunc(17, FPS, val);
 }
 
-void loadScenes() {
-}
-
 // utility function from stackoverflow, checks if a string ends with another string.
 bool endswith (std::string const &fullString, std::string const &ending) {
     if (fullString.length() >= ending.length()) {
@@ -235,6 +225,94 @@ bool endswith (std::string const &fullString, std::string const &ending) {
     } else {
         return false;
     }
+}
+
+void loadScenes() {
+    // open a directory for iterating over files
+    tinydir_dir dir;
+    tinydir_open(&dir, "scenes/");
+
+    // loop through all files
+    while (dir.has_next) {
+        // get next file
+        tinydir_file file;
+        tinydir_readfile(&dir, &file);
+
+        // we only want to look at files with .txt extension
+        if (endswith(file.name, ".txt")) {
+            // open the file for reading
+            std::string in = file.name;
+            std::ifstream infile("scenes/" + in);
+            // get the name of the scene from the file name
+            in.replace(in.end()-4, in.end(), "");
+            // represents current line
+            std::string line;
+
+            // the game objects comprising the scene
+            std::vector<GameObject> objs;
+            std::vector<Light> lights;
+
+            // loop over each line in the file
+            while(std::getline(infile, line)) {
+                // used for tokenizing
+                std::istringstream iss(line);
+                // grab first token (contains the name of the mesh)
+                // and second token (=either random or fixed)
+                std::string first_token, second_token;
+                iss >> first_token;
+                // check if the first token == "light" for light placement
+                if (first_token == "light") {
+                    float ln, x, y, z, ax, ay, az, dx, dy, dz, sx, sy, sz;
+                    iss >> ln >> x >> y >> z >> ax >> ay >> az >> dx >> dy >> dz >> sx >> sy >> sz;
+                    float pos[4] = {x, y, z, 1};
+
+                    float amb[4] = {ax, ay, az, 1.0};
+                    float diff[4] = {dx, dy, dz, 1.0};
+                    float spec[4] = {sx, sy, sz, 1.0};
+
+                    Light nl = Light(GL_LIGHT0 + ln, pos, amb, diff, spec, false);
+
+                    lights.push_back(nl);
+                } else {
+                    iss >> second_token;
+                    // check the second token
+                    if (second_token == "fixed") {
+                        float x, y, z;
+                        float xr, yr, zr;
+                        float scale;
+                        iss >> x >> y >> z >> xr >> yr >> zr >> scale;
+                        Point3D pos = Point3D(x, y, z);
+                        Point3D rot = Point3D(xr, yr, zr);
+                        GameObject nobj = GameObject(meshes[first_token], pos, rot, scale, false);
+                        objs.push_back(nobj);
+                    } else if (second_token == "random") {
+                        float base_scale;
+                        int max_count;
+                        iss >> base_scale >> max_count;
+                        int count = rand() % max_count;
+                        for (int i = 0; i < count; i++) {
+                            // generate random x, z position in (-5, 5)
+                            float randX = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10))) - 5;
+                            float randZ = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10))) - 5;
+                            float randScale = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX))) + 0.5;
+                            GameObject nobj = GameObject(meshes[first_token], Point3D(randX, 0, randZ), Point3D(0, 0, 0), base_scale * randScale, true);
+                            objs.push_back(nobj);
+                        }
+                    }
+                }
+            }
+
+            // construct the scene
+            Scene s = Scene(objs, lights);
+            scenes.insert(std::pair<std::string, Scene>(in, s));
+        }
+
+        // get next file in the directory
+        tinydir_next(&dir);
+    }
+
+    // free memory
+    tinydir_close(&dir);
 }
 
 // loads all meshes from the .obj files in models/
@@ -301,13 +379,8 @@ int main(int argc, char** argv)
     // so it doesn't appear frozen
     loadModels();
 
+    // loads all the scenes into a map
     loadScenes();
-
-    // this is just done to display an object, we should be instead loading a scene.
-    objs.push_back(GameObject(meshes["bed.obj"], Point3D(5, 0, 5), Point3D(0, -90, 0), 1.0, false));
-    objs.push_back(GameObject(meshes["desk.obj"], Point3D(5, 0, -5), Point3D(0, 0, 0), 1.0, false));
-    objs.push_back(GameObject(meshes["computer.obj"], Point3D(5, 1, -5.18), Point3D(0, -90, 0), 25.0, false));
-    objs.push_back(GameObject(meshes["tower.obj"], Point3D(5.1, 0.83, -5.55), Point3D(0, -90, 0), 0.0075, false));
 
     // randomize 1 ID for what object should be the random item that is the goal - PROTOTYPE
     // objects take random position in the scene. - PROTOTYPE
@@ -329,15 +402,6 @@ int main(int argc, char** argv)
 
     // set screen clear color to black
     glClearColor(0.0, 0.0, 0.0, 1.0);
-
-    // light properties
-    float pos[4] = {-100, 100, -30, 1};
-
-    float amb[4] = {0.3, 0.3, 0.3, 1.0};
-    float diff[4] = {0.7, 0.7, 0.7, 1.0};
-    float spec[4] = {1.0, 1.0, 1.0, 1.0};
-
-    l = Light(GL_LIGHT0, pos, amb, diff, spec, false);
 
     glEnable(GL_LIGHTING);
 

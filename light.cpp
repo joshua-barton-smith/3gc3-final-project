@@ -30,9 +30,6 @@ Light::Light(GLenum light, float position[], float ambient[], float diffuse[], f
 	this->constant = 0.0;
 	this->linear = 0.0;
 	this->quadratic = 0.0;
-
-	// enable the light
-	glEnable(this->boundLight);
 }
 
 /**
@@ -48,6 +45,8 @@ void Light::render() {
 		glPopMatrix();
 	}
 
+	// enable the light
+	glEnable(this->boundLight);
 	glLightfv(this->boundLight, GL_POSITION, this->position);
 	glLightfv(this->boundLight, GL_AMBIENT, this->ambient);
 	glLightfv(this->boundLight, GL_DIFFUSE, this->diffuse);
