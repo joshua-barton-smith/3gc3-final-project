@@ -12,6 +12,7 @@
 #include <iostream>
 
 #include "mesh.h"
+#include "mathLib3D.h"
 
 #include "include/tiny_obj_loader.h"
 
@@ -32,6 +33,62 @@ Mesh::Mesh(tinyobj::attrib_t attribs, std::vector<tinyobj::shape_t> shapes, std:
 	}
 }
 
+// this is used for hitboxes.
+void Mesh::computeBounds(float *bounds, float *center) {
+	float max_x = -999999999;
+	float min_x = 999999999;
+	float max_y = -999999999;
+	float min_y = 999999999;
+	float max_z = -999999999;
+	float min_z = 999999999;
+
+	// Loop over shapes in the model
+	for (size_t s = 0; s < shapes.size(); s++) {
+		// Loop over faces in this shape
+		size_t index_offset = 0;
+		for (size_t f = 0; f < shapes[s].mesh.num_face_vertices.size(); f++) {
+			// this is the count of vertices in the face
+			// (but for now I am assuming all faces have 3 bc i triangulate in Blender)
+			int fv = shapes[s].mesh.num_face_vertices[f];
+
+			// Loop over vertices in the face.
+			for (int v = 0; v < fv; v++) {
+				// access to vertex
+				tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
+				tinyobj::real_t vx = attribs.vertices[3*idx.vertex_index+0];
+				tinyobj::real_t vy = attribs.vertices[3*idx.vertex_index+1];
+				tinyobj::real_t vz = attribs.vertices[3*idx.vertex_index+2];
+
+				// compare to existing max/min values
+				if (vx > max_x) max_x = vx;
+				if (vx < min_x) min_x = vx;
+
+				if (vy > max_y) max_y = vy;
+				if (vy < min_y) min_y = vy;
+
+				if (vz > max_z) max_z = vz;
+				if (vz < min_z) min_z = vz;
+			}
+
+			index_offset += fv;
+		}
+	}
+
+	// now compute the distance
+	float xd = max_x - min_x;
+	float yd = max_y - min_y;
+	float zd = max_z - min_z;
+
+	// return these
+	bounds[0] = xd;
+	bounds[1] = yd;
+	bounds[2] = zd;
+
+	center[0] = (max_x + min_x) / 2;
+	center[1] = (max_y + min_y) / 2;
+	center[2] = (max_z + min_z) / 2;
+}
+
 // renders the mesh
 void Mesh::render() {
 	// Loop over shapes in the model
@@ -50,7 +107,7 @@ void Mesh::render() {
 			glBegin(GL_TRIANGLES);
 
 			// Loop over vertices in the face.
-			for (size_t v = 0; v < fv; v++) {
+			for (int v = 0; v < fv; v++) {
 				// access to vertex
 				tinyobj::index_t idx = shapes[s].mesh.indices[index_offset + v];
 				tinyobj::real_t vx = attribs.vertices[3*idx.vertex_index+0];

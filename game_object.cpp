@@ -20,6 +20,13 @@ GameObject::GameObject(Mesh *mesh, Point3D position, Point3D rotation, float sca
 	this->rotation = rotation;
 	this->scale = scale;
 	this->random = random;
+	this->mesh->computeBounds(this->bounds, this->center);
+	this->bounds[0] *= this->scale;
+	this->bounds[1] *= this->scale;
+	this->bounds[2] *= this->scale;
+	this->center[0] *= this->scale;
+	this->center[1] *= this->scale;
+	this->center[2] *= this->scale;
 }
 
 void GameObject::render() {

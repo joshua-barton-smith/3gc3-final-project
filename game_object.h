@@ -14,6 +14,9 @@ public:
 	Point3D rotation;
 	float scale;
 
+	float bounds[3];
+	float center[3];
+
 	bool random;
 
 	Mesh *mesh;

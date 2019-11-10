@@ -205,11 +205,27 @@ void FPS(int val)
 {
     // applies rotations
     camera.applyRotation();
+    // save the camera position
+    Point3D oldpos = Point3D(camera.camPos.mX, camera.camPos.mY, camera.camPos.mZ);
     // apply movement for each of the input keys
     for (int i = 0; i < 4; i++) {
         if (movement[i]) {
-            camera.applyMovement(i, 0.5);
+            camera.applyMovement(i, 0.2);
         }
+    }
+    Point3D newpos = Point3D(camera.camPos.mX, camera.camPos.mY, camera.camPos.mZ);
+    // check collision with any game objects
+    for (size_t i = 0; i < scenes["bedroom"].objs.size(); i++) {
+        GameObject g = scenes["bedroom"].objs[i];
+        // we check for collision on 3 axis
+        // check if inside x component
+        if (newpos.mX < (g.position.mX + g.center[0] + g.bounds[0])
+            && newpos.mX > (g.position.mX + g.center[0] - g.bounds[0]) &&
+            newpos.mY < (g.position.mY + g.center[1] + g.bounds[1])
+            && newpos.mY > (g.position.mY + g.center[1] - g.bounds[1]) &&
+            newpos.mZ < (g.position.mZ + g.center[2] + g.bounds[2])
+            && newpos.mZ > (g.position.mZ + g.center[2] - g.bounds[2]))
+            camera.camPos = Vec3D(oldpos.mX, oldpos.mY, oldpos.mZ);
     }
 
     timer--;

@@ -3,6 +3,7 @@
 
 #include "include/tiny_obj_loader.h"
 #include "material.h"
+#include "mathLib3D.h"
 
 class Mesh {
 public:
@@ -10,6 +11,7 @@ public:
 	Mesh(tinyobj::attrib_t attribs, std::vector<tinyobj::shape_t> shapes, std::vector<tinyobj::material_t> materials);
 
 	void render();
+	void computeBounds(float *bounds, float *center);
 
 	tinyobj::attrib_t attribs;
 	std::vector<tinyobj::shape_t> shapes;
