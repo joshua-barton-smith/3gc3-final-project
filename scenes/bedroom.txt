@@ -2,7 +2,7 @@
 light 0 4.3 1.8 1 0.3 0.3 0.3 0.5 0.5 0.5 1.0 1.0 1.0
 
 # fixed-object setup: (obj name) fixed (pos x, y, z) (rotation x, y, z) (scale)
-bed.obj fixed 4 0 4 0 -90 0 2
+bed.obj fixed 4 2 4 0 -90 0 2
 desk.obj fixed 5 0 -4.7 0 0 0 2
 computer.obj fixed 5 2.1 -4.78 0 -90 0 50
 tower.obj fixed 5.1 1.83 -5.6 0 -90 0 0.015
