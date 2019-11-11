@@ -14,6 +14,8 @@
 
 #include <iostream>
 
+GameObject::GameObject() {}
+
 GameObject::GameObject(Point3D position, Point3D rotation, float scale, bool random) {
 	this->position = position;
 	this->rotation = rotation;
@@ -61,19 +63,23 @@ void GameObject::logic(std::vector<GameObject> others, int idx) {
 		grav += 0.0098;
 		this->position.mY -= grav;
 		// check collision
-		for (int i = 0; i < others.size(); i++) {
+		for (size_t i = 0; i < others.size(); i++) {
 			if (i != idx) {
 				GameObject g = others[i];
-				if ((this->position.mX + this->bounds[0]) < (g.position.mX + g.bounds[3])
-		            && (this->position.mX + this->bounds[3]) > (g.position.mX + g.bounds[0]) &&
-		            (this->position.mY + this->bounds[1]) < (g.position.mY + g.bounds[4])
-		            && (this->position.mY + this->bounds[4]) > (g.position.mY + g.bounds[1]) &&
-		            (this->position.mZ + this->bounds[2]) < (g.position.mZ + g.bounds[5])
-		            && (this->position.mZ + this->bounds[5]) > (g.position.mZ + g.bounds[2])) {
+				if (this->check_collision(g)) {
 		            	this->position = Point3D(oldpos.mX, oldpos.mY, oldpos.mZ);
 		            	this->grav = 0;
 		    	}
 	    	}
 		}
 	}
+}
+
+bool GameObject::check_collision(GameObject g) {
+	return ((this->position.mX + this->bounds[0]) < (g.position.mX + g.bounds[3])
+		            && (this->position.mX + this->bounds[3]) > (g.position.mX + g.bounds[0]) &&
+		            (this->position.mY + this->bounds[1]) < (g.position.mY + g.bounds[4])
+		            && (this->position.mY + this->bounds[4]) > (g.position.mY + g.bounds[1]) &&
+		            (this->position.mZ + this->bounds[2]) < (g.position.mZ + g.bounds[5])
+		            && (this->position.mZ + this->bounds[5]) > (g.position.mZ + g.bounds[2]));
 }

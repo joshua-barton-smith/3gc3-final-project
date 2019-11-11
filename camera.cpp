@@ -115,12 +115,15 @@ void Camera::applyMovement(int movement, float speed) {
 	// second ones are for strafe left/right, it produces a cross product between the direction
 	// camera is pointing in, and direction pointing upwards.
 	// this produces a vector perpendicular to both (i.e. pointing left/right of the camera)
+
+	// NOTE: for final project i've commented out the y-components of the movement. this is bc the camera
+	// should not be moving up/down freely if it's an object affected by gravity
 	switch(movement) {
 		case CAMERA_MOVE_FORWARD:
 		{
 			Vec3D tmp = this->camFront.multiply(speed);
 			this->camPos.mX += tmp.mX;
-			this->camPos.mY += tmp.mY;
+			//this->camPos.mY += tmp.mY;
 			this->camPos.mZ += tmp.mZ;
 			break;
 		}
@@ -128,7 +131,7 @@ void Camera::applyMovement(int movement, float speed) {
 		{
 			Vec3D tmp = this->camFront.multiply(speed);
 			this->camPos.mX -= tmp.mX;
-			this->camPos.mY -= tmp.mY;
+			//this->camPos.mY -= tmp.mY;
 			this->camPos.mZ -= tmp.mZ;
 			break;
 		}
@@ -136,7 +139,7 @@ void Camera::applyMovement(int movement, float speed) {
 		{
 			Vec3D tmp = this->camFront.cross(this->camUp).normalize().multiply(speed);
 			this->camPos.mX += tmp.mX;
-			this->camPos.mY += tmp.mY;
+			//this->camPos.mY += tmp.mY;
 			this->camPos.mZ += tmp.mZ;
 			break;
 		}
@@ -144,7 +147,7 @@ void Camera::applyMovement(int movement, float speed) {
 		{
 			Vec3D tmp = this->camFront.cross(this->camUp).normalize().multiply(speed);
 			this->camPos.mX -= tmp.mX;
-			this->camPos.mY -= tmp.mY;
+			//this->camPos.mY -= tmp.mY;
 			this->camPos.mZ -= tmp.mZ;
 			break;
 		}
