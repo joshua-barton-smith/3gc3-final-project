@@ -34,7 +34,7 @@ Mesh::Mesh(tinyobj::attrib_t attribs, std::vector<tinyobj::shape_t> shapes, std:
 }
 
 // this is used for hitboxes.
-void Mesh::computeBounds(float *bounds, float *center) {
+void Mesh::computeBounds(float *bounds) {
 	float max_x = -999999999;
 	float min_x = 999999999;
 	float max_y = -999999999;
@@ -74,19 +74,13 @@ void Mesh::computeBounds(float *bounds, float *center) {
 		}
 	}
 
-	// now compute the distance
-	float xd = max_x - min_x;
-	float yd = max_y - min_y;
-	float zd = max_z - min_z;
-
 	// return these
-	bounds[0] = xd;
-	bounds[1] = yd;
-	bounds[2] = zd;
-
-	center[0] = (max_x + min_x) / 2;
-	center[1] = (max_y + min_y) / 2;
-	center[2] = (max_z + min_z) / 2;
+	bounds[0] = min_x;
+	bounds[1] = min_y;
+	bounds[2] = min_z;
+	bounds[3] = max_x;
+	bounds[4] = max_y;
+	bounds[5] = max_z; 
 }
 
 // renders the mesh

@@ -6,18 +6,22 @@
 
 class GameObject {
 public:
+	GameObject(Point3D position, Point3D rotation, float scale, bool random);
 	GameObject(Mesh *mesh, Point3D position, Point3D rotation, float scale, bool random);
 
 	void render();
+	void logic(std::vector<GameObject> others, int idx);
 
 	Point3D position;
 	Point3D rotation;
 	float scale;
 
-	float bounds[3];
-	float center[3];
+	float bounds[6];
+
+	float grav;
 
 	bool random;
+	bool norender;
 
 	Mesh *mesh;
 };

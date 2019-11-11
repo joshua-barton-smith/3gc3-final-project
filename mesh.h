@@ -11,7 +11,7 @@ public:
 	Mesh(tinyobj::attrib_t attribs, std::vector<tinyobj::shape_t> shapes, std::vector<tinyobj::material_t> materials);
 
 	void render();
-	void computeBounds(float *bounds, float *center);
+	void computeBounds(float *bounds);
 
 	tinyobj::attrib_t attribs;
 	std::vector<tinyobj::shape_t> shapes;

@@ -36,7 +36,7 @@
 #include <iterator>
 
 // the two Vec3D represent the eye position and the lookAt position
-Camera camera = Camera(Vec3D(0.0, 0.0, 0.0), Vec3D(1.0, 0.0, 0.0));
+Camera camera = Camera(Vec3D(0.0, 2.0, 0.0), Vec3D(1.0, 2.0, 0.0));
 
 // width and height of the screen.
 int screen_width = 600;
@@ -53,6 +53,9 @@ bool movement[] = {false, false, false, false};
 std::map<std::string, Mesh*> meshes;
 // a map of all available scenes
 std::map<std::string, Scene> scenes;
+
+float sceneBounds[] = {-6, 6, -1, 5, -6, 6};
+Material matBounds;
 
 /**
 * Handles regular keyboard inputs (e.g. w/s/a/d for movement)
@@ -172,8 +175,49 @@ void motion(int x, int y)
 }
 
 void drawWalls() {
-    glBegin (GL_QUADS);
+    matBounds.bind();
+    glBegin(GL_QUADS);
+        glNormal3f(0, 1, 0);
+        glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[5]);
+        glVertex3f(sceneBounds[1], sceneBounds[2], sceneBounds[5]);
+        glVertex3f(sceneBounds[1], sceneBounds[2], sceneBounds[4]);
+        glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[4]);
+    glEnd();
 
+    glBegin(GL_QUADS);
+        glNormal3f(0, -1, 0);
+        glVertex3f(sceneBounds[0], sceneBounds[3], sceneBounds[4]);
+        glVertex3f(sceneBounds[1], sceneBounds[3], sceneBounds[4]);
+        glVertex3f(sceneBounds[1], sceneBounds[3], sceneBounds[5]);
+        glVertex3f(sceneBounds[0], sceneBounds[3], sceneBounds[5]);
+    glEnd();
+
+    glBegin(GL_QUADS);
+        glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[5]);
+        glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[4]);
+        glVertex3f(sceneBounds[0], sceneBounds[3], sceneBounds[4]);
+        glVertex3f(sceneBounds[0], sceneBounds[3], sceneBounds[5]);
+    glEnd();
+
+    glBegin(GL_QUADS);
+        glVertex3f(sceneBounds[1], sceneBounds[3], sceneBounds[5]);
+        glVertex3f(sceneBounds[1], sceneBounds[3], sceneBounds[4]);
+        glVertex3f(sceneBounds[1], sceneBounds[2], sceneBounds[4]);
+        glVertex3f(sceneBounds[1], sceneBounds[2], sceneBounds[5]);
+    glEnd();
+
+    glBegin(GL_QUADS);
+        glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[4]);
+        glVertex3f(sceneBounds[1], sceneBounds[2], sceneBounds[4]);
+        glVertex3f(sceneBounds[1], sceneBounds[1], sceneBounds[4]);
+        glVertex3f(sceneBounds[0], sceneBounds[1], sceneBounds[4]);
+    glEnd();
+
+    glBegin(GL_QUADS);
+        glVertex3f(sceneBounds[0], sceneBounds[1], sceneBounds[5]);
+        glVertex3f(sceneBounds[1], sceneBounds[1], sceneBounds[5]);
+        glVertex3f(sceneBounds[1], sceneBounds[2], sceneBounds[5]);
+        glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[5]);
     glEnd();
 }
 
@@ -187,6 +231,8 @@ void display()
     // clear screen
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
     camera.lookAt();
+
+    drawWalls();
 
     // render the scene, this includes all objects and lights making up the scene
     scenes["bedroom"].render();
@@ -210,21 +256,23 @@ void FPS(int val)
     // apply movement for each of the input keys
     for (int i = 0; i < 4; i++) {
         if (movement[i]) {
-            camera.applyMovement(i, 0.2);
+            camera.applyMovement(i, 0.1);
         }
     }
     Point3D newpos = Point3D(camera.camPos.mX, camera.camPos.mY, camera.camPos.mZ);
     // check collision with any game objects
     for (size_t i = 0; i < scenes["bedroom"].objs.size(); i++) {
+        scenes["bedroom"].objs[i].logic(scenes["bedroom"].objs, i);
         GameObject g = scenes["bedroom"].objs[i];
+
         // we check for collision on 3 axis
         // check if inside x component
-        if (newpos.mX < (g.position.mX + g.center[0] + g.bounds[0])
-            && newpos.mX > (g.position.mX + g.center[0] - g.bounds[0]) &&
-            newpos.mY < (g.position.mY + g.center[1] + g.bounds[1])
-            && newpos.mY > (g.position.mY + g.center[1] - g.bounds[1]) &&
-            newpos.mZ < (g.position.mZ + g.center[2] + g.bounds[2])
-            && newpos.mZ > (g.position.mZ + g.center[2] - g.bounds[2]))
+        if (newpos.mX < (g.position.mX + g.bounds[3])
+            && newpos.mX > (g.position.mX + g.bounds[0]) &&
+            newpos.mY < (g.position.mY + g.bounds[4])
+            && newpos.mY > (g.position.mY + g.bounds[1]) &&
+            newpos.mZ < (g.position.mZ + g.bounds[5])
+            && newpos.mZ > (g.position.mZ + g.bounds[2]))
             camera.camPos = Vec3D(oldpos.mX, oldpos.mY, oldpos.mZ);
     }
 
@@ -304,16 +352,14 @@ void loadScenes() {
                     } else if (second_token == "random") {
                         float base_scale;
                         int max_count;
-                        iss >> base_scale >> max_count;
-                        int count = rand() % max_count;
-                        for (int i = 0; i < count; i++) {
-                            // generate random x, z position in (-5, 5)
-                            float randX = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10))) - 5;
-                            float randZ = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10))) - 5;
-                            float randScale = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX))) + 0.5;
-                            GameObject nobj = GameObject(meshes[first_token], Point3D(randX, 0, randZ), Point3D(0, 0, 0), base_scale * randScale, true);
-                            objs.push_back(nobj);
-                        }
+                        iss >> base_scale;
+                        // generate random x, z position in (-5, 5)
+                        float randX = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10))) - 5;
+                        float randY = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/180)));
+                        float randZ = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10))) - 5;
+                        float randScale = ((static_cast <float> (rand()) / (static_cast <float> (RAND_MAX))) * 5) + 2.5;
+                        GameObject nobj = GameObject(meshes[first_token], Point3D(randX, 2, randZ), Point3D(0, randY, 0), base_scale * randScale, true);
+                        objs.push_back(nobj);
                     }
                 }
             }
@@ -398,11 +444,16 @@ int main(int argc, char** argv)
     // loads all the scenes into a map
     loadScenes();
 
-    // randomize 1 ID for what object should be the random item that is the goal - PROTOTYPE
-    // objects take random position in the scene. - PROTOTYPE
-    // objects can take random size, similar objects with different sizes. - PROTOTYPE
+    GameObject floor = GameObject(Point3D(0, 0, 0), Point3D(0, 0, 0), 1.0, false);
+    floor.bounds[0] = -5;
+    floor.bounds[1] = -1;
+    floor.bounds[2] = -5;
+    floor.bounds[3] = 5;
+    floor.bounds[4] = -0.99;
+    floor.bounds[5] = 5;
+    scenes["bedroom"].objs.push_back(floor);
 
-    // allow objects to be duplicated some number of times in the scene when it's generated - PROTOTYPE
+    // randomize 1 ID for what object should be the random item that is the goal - PROTOTYPE
 
     // provide user with a hint if they pick the wrong object. make comparison with name, size, etc. of the target
 
@@ -415,6 +466,13 @@ int main(int argc, char** argv)
 
     // disable cursor (seems not to work on unix systems)
     glutSetCursor(GLUT_CURSOR_NONE);
+
+    float amb[4] = {0.3, 0.3, 0.3, 1.0};
+    float diff[4] = {0.7, 0.7, 0.7, 1.0};
+    float spec[4] = {1.0, 1.0, 1.0, 1.0};
+    float shin = 100;
+
+    matBounds = Material(amb, diff, spec, shin);
 
     // set screen clear color to black
     glClearColor(0.0, 0.0, 0.0, 1.0);
