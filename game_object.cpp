@@ -16,12 +16,13 @@
 
 GameObject::GameObject() {}
 
-GameObject::GameObject(Point3D position, Point3D rotation, float scale, bool random) {
+GameObject::GameObject(Point3D position, Point3D rotation, float scale, bool random, bool physics) {
 	this->position = position;
 	this->rotation = rotation;
 	this->scale = scale;
 	this->random = random;
 	this->norender = true;
+	this->physics = physics;
 	this->grav = 0;
 }
 
@@ -41,6 +42,7 @@ GameObject::GameObject(Mesh *mesh, Point3D position, Point3D rotation, float sca
 	this->bounds[4] *= this->scale;
 	this->bounds[5] *= this->scale;
 	this->grav = 0;
+	this->physics = true;
 }
 
 void GameObject::render() {
@@ -58,7 +60,7 @@ void GameObject::render() {
 
 void GameObject::logic(std::vector<GameObject> others, int idx) {
 	Point3D oldpos = Point3D(this->position.mX, this->position.mY, this->position.mZ);
-	if (!norender) {
+	if (physics) {
 		// apply gravity
 		grav += 0.0098;
 		this->position.mY -= grav;

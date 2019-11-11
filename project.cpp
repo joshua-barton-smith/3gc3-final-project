@@ -273,26 +273,22 @@ void FPS(int val)
             camera.applyMovement(i, 0.1);
         }
     }
-    // this is the new position of the camera for comparisons
-    Point3D newpos = Point3D(camera.camPos.mX, camera.camPos.mY, camera.camPos.mZ);
+    scenes["bedroom"].objs[0].position = Point3D(camera.camPos.mX, camera.camPos.mY, camera.camPos.mZ);
     // check collision with any game objects
     for (size_t i = 0; i < scenes["bedroom"].objs.size(); i++) {
         // logic step for each object making up the scene,
         // this will e.g. update their y position based on gravtiy
         scenes["bedroom"].objs[i].logic(scenes["bedroom"].objs, i);
-        GameObject g = scenes["bedroom"].objs[i];
-
-        // we check for collision on 3 axis
-        // check if inside x component
-        // would prefer if this could be a GameObject as well..
-        if (newpos.mX < (g.position.mX + g.bounds[3])
-            && newpos.mX > (g.position.mX + g.bounds[0]) &&
-            newpos.mY < (g.position.mY + g.bounds[4])
-            && newpos.mY > (g.position.mY + g.bounds[1]) &&
-            newpos.mZ < (g.position.mZ + g.bounds[5])
-            && newpos.mZ > (g.position.mZ + g.bounds[2]))
-            camera.camPos = Vec3D(oldpos.mX, oldpos.mY, oldpos.mZ);
     }
+
+    for (size_t i = 1; i < scenes["bedroom"].objs.size(); i++) {
+        if (scenes["bedroom"].objs[i].check_collision(scenes["bedroom"].objs[0])) {
+            scenes["bedroom"].objs[0].position = Point3D(oldpos.mX, oldpos.mY, oldpos.mZ);
+            break;
+        }
+    }
+
+    camera.camPos = Vec3D(scenes["bedroom"].objs[0].position.mX, scenes["bedroom"].objs[0].position.mY, scenes["bedroom"].objs[0].position.mZ);
 
     // reduce the timer
     timer--;
@@ -337,6 +333,17 @@ void loadScenes() {
             std::vector<GameObject> objs;
             // list of lights in the scene
             std::vector<Light> lights;
+
+            // construct an object to represent the camera with.
+            // camera will always have index 0 in objs.
+            GameObject cam = GameObject(Point3D(0, 2, 0), Point3D(0, 0, 0), 1.0, false, true);
+            cam.bounds[0] = -0.3;
+            cam.bounds[1] = -2.0;
+            cam.bounds[2] = -0.3;
+            cam.bounds[3] = 0.3;
+            cam.bounds[4] = 2.0;
+            cam.bounds[5] = 0.3;
+            objs.insert(objs.begin(), cam);
 
             // loop over each line in the file
             while(std::getline(infile, line)) {
@@ -497,7 +504,7 @@ int main(int argc, char** argv)
     // this is just a gameobject representation of the floor,
     // it would be much better to have a proper mesh for the floor instead
     // of hardcoding this and hardcoding the walls
-    GameObject floor = GameObject(Point3D(0, 0, 0), Point3D(0, 0, 0), 1.0, false);
+    GameObject floor = GameObject(Point3D(0, 0, 0), Point3D(0, 0, 0), 1.0, false, false);
     floor.bounds[0] = -5;
     floor.bounds[1] = -1;
     floor.bounds[2] = -5;

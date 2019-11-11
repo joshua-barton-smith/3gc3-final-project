@@ -3,12 +3,11 @@
 
 #include "mathLib3D.h"
 #include "mesh.h"
-#include "camera.h"
 
 class GameObject {
 public:
 	GameObject();
-	GameObject(Point3D position, Point3D rotation, float scale, bool random);
+	GameObject(Point3D position, Point3D rotation, float scale, bool random, bool physics);
 	GameObject(Mesh *mesh, Point3D position, Point3D rotation, float scale, bool random);
 
 	void render();
@@ -27,15 +26,9 @@ public:
 	bool random;
 	bool norender;
 
+	bool physics;
+
 	Mesh *mesh;
-};
-
-class GameObjectCamera : public GameObject {
-public:
-	GameObjectCamera();
-	GameObjectCamera(Point3D position, Point3D rotation, float scale, bool random, Camera *camera);
-
-	virtual void logic(std::vector<GameObject> others, int idx);
 };
 
 #endif
