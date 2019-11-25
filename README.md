@@ -6,8 +6,7 @@
 - The player cannot select any items, this will need to be implemented via ray picking.
 - Currently, there is no functionality for providing hints to the user as to what objects they need to find. We need to implement some sort of either text-based hint system, or else an image of the object they need to find.
 - Additionally, once the above have been implemented, scoring and some sort of win/loss system needs to be implemented.
-- Collision detection works currently but needs changes; objects which collide will lose all motion in all directions (so e.g. if 2 objects are spawned in the same location they get stuck in mid-air).
-- Objects should probably not be spawned above objects with odd hitboxes (e.g. the bed or the closet) since the hitbox extends far past the model and causes objects to float in mid-air.
+- Collision detection works currently but needs changes; objects which collide will lose all motion in all directions (so e.g. if 2 objects are spawned in the same location they get stuck in mid-air). - this might be fine bc code was added to move objects if they spawn in a collision
 - Objects will have textures applied for the final product.
 - Some objects should be animated.
 

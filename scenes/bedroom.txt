@@ -1,5 +1,5 @@
 # light setup: (light number) (pos x, y, z) (ambient x, y, z) (diffuse x, y, z) (specular x, y, z)
-light 0 4.3 1.8 1 0.3 0.3 0.3 0.5 0.5 0.5 1.0 1.0 1.0
+light 0 4.3 1.8 1 0.6 0.6 0.6 0.8 0.8 0.8 1.0 1.0 1.0
 
 # fixed-object setup: (obj name) fixed (pos x, y, z) (rotation x, y, z) (scale)
 bed.obj fixed 4 2 4 0 -90 0 2
@@ -14,7 +14,21 @@ Sock.obj random 0.02
 block_b.obj random 0.4
 baseball.obj random 1
 books.obj random 0.5
-block_5.obj random 1
+block_5.obj random 0.4
 glove.obj random 0.5
 backpack.obj random 0.4
 cowboy.obj random 1.3
+baseball_hat.obj random 1
+baseballGlove.obj random 1
+bird_book.obj random 1
+block_k.obj random 0.4
+block_o.obj random 0.4
+blue_sneakers.obj random 0.3
+boxing_glove.obj random 1
+cube1.obj random 0.3
+doctor_bag.obj random 1
+knitted_hat.obj random 0.3
+notebook.obj random 0.2
+sienna_sneakers.obj random 0.4
+snowshoes.obj random 0.5
+Sombrero.obj random 1

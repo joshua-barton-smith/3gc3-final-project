@@ -62,7 +62,7 @@ void GameObject::logic(std::vector<GameObject> others, int idx) {
 	Point3D oldpos = Point3D(this->position.mX, this->position.mY, this->position.mZ);
 	if (physics) {
 		// apply gravity
-		grav += 0.0098;
+		this->grav += 0.0098;
 		this->position.mY -= grav;
 		// check collision
 		for (size_t i = 0; i < others.size(); i++) {
