@@ -16,7 +16,7 @@
 
 GameObject::GameObject() {}
 
-GameObject::GameObject(Point3D position, Point3D rotation, float scale, bool random, bool physics) {
+GameObject::GameObject(Point3D position, Point3D rotation, float scale, bool random, bool physics, GLuint texture) {
 	this->position = position;
 	this->rotation = rotation;
 	this->scale = scale;
@@ -24,11 +24,12 @@ GameObject::GameObject(Point3D position, Point3D rotation, float scale, bool ran
 	this->norender = true;
 	this->physics = physics;
 	this->grav = 0;
+	this->texture = texture;
 }
 
 // need a way to find size of the object for checking what object is being interacted with
 // we can check within a range of the object so it doesnt have to be super precise.
-GameObject::GameObject(Mesh *mesh, Point3D position, Point3D rotation, float scale, bool random) {
+GameObject::GameObject(Mesh *mesh, Point3D position, Point3D rotation, float scale, bool random, GLuint texture) {
 	this->mesh = mesh;
 	this->position = position;
 	this->rotation = rotation;
@@ -43,10 +44,19 @@ GameObject::GameObject(Mesh *mesh, Point3D position, Point3D rotation, float sca
 	this->bounds[5] *= this->scale;
 	this->grav = 0;
 	this->physics = true;
+	this->texture = texture;
+	this->norender = false;
 }
 
 void GameObject::render() {
 	if(norender) return;
+
+	glBindTexture(GL_TEXTURE_2D, this->texture);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
 	glPushMatrix();
 		glTranslatef(this->position.mX, this->position.mY, this->position.mZ);
 		glRotatef(this->rotation.mX, 1.0, 0.0, 0.0);

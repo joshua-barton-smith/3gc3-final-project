@@ -111,12 +111,17 @@ void Mesh::render() {
 				tinyobj::real_t ny = attribs.normals[3*idx.normal_index+1];
 				tinyobj::real_t nz = attribs.normals[3*idx.normal_index+2];
 				// we will need these at some point for texturing.
-				//tinyobj::real_t tx = attribs.texcoords[2*idx.texcoord_index+0];
-				//tinyobj::real_t ty = attribs.texcoords[2*idx.texcoord_index+1];
+				tinyobj::real_t tx = 0;
+				tinyobj::real_t ty = 0;
+				if (idx.texcoord_index >= 0) {
+					tx = attribs.texcoords[2*idx.texcoord_index+0];
+					ty = attribs.texcoords[2*idx.texcoord_index+1];
+				}
 
 				// draw the vertex with its predefined normal
 				glNormal3f(nx, ny, nz);
 				glVertex3f(vx, vy, vz);
+				glTexCoord2f(tx, ty);
 			}
 
 			glEnd();

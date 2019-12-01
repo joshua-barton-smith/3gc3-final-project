@@ -347,7 +347,7 @@ void loadScenes() {
 
             // construct an object to represent the camera with.
             // camera will always have index 0 in objs.
-            GameObject cam = GameObject(Point3D(0, 2, 0), Point3D(0, 0, 0), 1.0, false, true);
+            GameObject cam = GameObject(Point3D(0, 2, 0), Point3D(0, 0, 0), 1.0, false, true, 0);
             cam.bounds[0] = -0.3;
             cam.bounds[1] = -2.0;
             cam.bounds[2] = -0.3;
@@ -398,7 +398,7 @@ void loadScenes() {
                         Point3D pos = Point3D(x, y, z);
                         Point3D rot = Point3D(xr, yr, zr);
                         // construct GameObject, with the mesh pointer passed from meshes map
-                        GameObject nobj = GameObject(meshes[first_token], pos, rot, scale, false);
+                        GameObject nobj = GameObject(meshes[first_token], pos, rot, scale, false, 0);
                         objs.push_back(nobj);
                     } else if (second_token == "random") {
                         // base scale of the object, it gets randomized a little bit too
@@ -410,6 +410,22 @@ void loadScenes() {
                         bool has_collided = true;
                         // object we will insert once calculated
                         GameObject nobj;
+                        // load texture
+                        std::string fname = first_token;
+                        fname.replace(fname.end()-4, fname.end(), "");
+                        fname = "models/" + fname + ".png";
+                        GLuint texture = SOIL_load_OGL_texture
+                        (
+                            fname.c_str(),
+                            SOIL_LOAD_AUTO,
+                            SOIL_CREATE_NEW_ID,
+                            SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+                        );
+                        /* check for an error during the load process */
+                        if( 0 == texture )
+                        {
+                            printf( "SOIL loading error: '%s'\n", SOIL_last_result() );
+                        }
                         // loop
                         while (has_collided) {
                             // set flag to false to break the loop if no collision found
@@ -421,7 +437,7 @@ void loadScenes() {
                             float randZ = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10))) - 5;
                             float randScale = ((static_cast <float> (rand()) / (static_cast <float> (RAND_MAX))) * 5) + 2.5;
                             // build the gameobject
-                            nobj = GameObject(meshes[first_token], Point3D(randX, 2, randZ), Point3D(0, randY, 0), base_scale * randScale, true);
+                            nobj = GameObject(meshes[first_token], Point3D(randX, 2, randZ), Point3D(0, randY, 0), base_scale * randScale, true, texture);
                             // check collision with all other gameobjects
                             for (size_t i = 0; i < objs.size(); i++) {
                                 if (nobj.check_collision(objs[i])) has_collided = true;
@@ -509,21 +525,6 @@ int main(int argc, char** argv)
     // so it doesn't appear frozen
     loadModels();
 
-    // loads all the scenes into a map
-    loadScenes();
-
-    // this is just a gameobject representation of the floor,
-    // it would be much better to have a proper mesh for the floor instead
-    // of hardcoding this and hardcoding the walls
-    GameObject floor = GameObject(Point3D(0, 0, 0), Point3D(0, 0, 0), 1.0, false, false);
-    floor.bounds[0] = -5;
-    floor.bounds[1] = -1;
-    floor.bounds[2] = -5;
-    floor.bounds[3] = 5;
-    floor.bounds[4] = -0.99;
-    floor.bounds[5] = 5;
-    scenes["bedroom"].objs.push_back(floor);
-
     // randomize 1 ID for what object should be the random item that is the goal - PROTOTYPE
 
     // provide user with a hint if they pick the wrong object. make comparison with name, size, etc. of the target - to be done for final
@@ -534,6 +535,21 @@ int main(int argc, char** argv)
     glutInitWindowSize(screen_width, screen_height);
     glutInitWindowPosition(0, 0);
     glutCreateWindow("3GC3 Final Project");
+
+    // loads all the scenes into a map
+    loadScenes();
+
+    // this is just a gameobject representation of the floor,
+    // it would be much better to have a proper mesh for the floor instead
+    // of hardcoding this and hardcoding the walls
+    GameObject floor = GameObject(Point3D(0, 0, 0), Point3D(0, 0, 0), 1.0, false, false, 0);
+    floor.bounds[0] = -5;
+    floor.bounds[1] = -1;
+    floor.bounds[2] = -5;
+    floor.bounds[3] = 5;
+    floor.bounds[4] = -0.99;
+    floor.bounds[5] = 5;
+    scenes["bedroom"].objs.push_back(floor);
 
     // disable cursor (seems not to work on unix systems)
     glutSetCursor(GLUT_CURSOR_NONE);
@@ -558,6 +574,8 @@ int main(int argc, char** argv)
     glEnable(GL_DEPTH_TEST);
     glCullFace(GL_BACK);
     glEnable(GL_CULL_FACE);
+
+    glEnable(GL_TEXTURE_2D);
 
     // callbacks
     glutKeyboardFunc(handleKeyboard);
