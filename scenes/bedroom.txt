@@ -9,7 +9,7 @@ tower.obj fixed 5.1 1.83 -5.6 0 -90 0 0.015
 frame.obj fixed 4.8 2.1 -3.9 0 135 0 0.1
 closet.obj fixed -4.7 1 -4.5 0 90 0 5.2
 lamp.obj fixed 4.8 0 1 0 0 0 10
-# random-object setup: (obj name) random (base scale) (max generated)
+# random-object setup: (obj name) random (base scale)
 Sock.obj random 0.02
 block_b.obj random 0.4
 baseball.obj random 1

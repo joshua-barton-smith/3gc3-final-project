@@ -17,6 +17,8 @@
 
 #include "include/tinydir.h"
 
+#include "include/soil/SOIL.h"
+
 #include "mathLib3D.h"
 #include "camera.h"
 #include "light.h"
@@ -157,6 +159,15 @@ void drawHUD() {
     glRasterPos2f(-1, 0.9);
     // write string to screen
     glutBitmapString(GLUT_BITMAP_HELVETICA_18, reinterpret_cast<const unsigned char*>(output.c_str()));
+
+    // render a small crosshair to indicate camera position
+    glColor4f(0.0, 0.0, 1.0, 1.0);
+    glBegin(GL_LINES);
+        glVertex3f(-0.02, -0.02, 1.0);
+        glVertex3f(0.02, 0.02, 1.0);
+        glVertex3f(-0.02, 0.02, 1.0);
+        glVertex3f(0.02, -0.02, 1.0);
+    glEnd();
     // re-enable lighting for the next render
     glEnable(GL_LIGHTING);
 }

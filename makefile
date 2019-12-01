@@ -5,7 +5,7 @@
 
 #changing platform dependant stuff, do not change this
 # Linux (default)
-LDFLAGS = -lGL -lGLU -lglut
+LDFLAGS =-L./include/ -lGLU -lglut -lSOIL -lGL 
 CFLAGS=-g -Wall -std=c++11
 CXXFLAGS=-g -Wall -std=c++11
 CC=g++
@@ -16,7 +16,7 @@ RM=rm
 ifeq "$(OS)" "Windows_NT"
 	EXEEXT=.exe #on windows applications must have .exe extension
 	RM=del #rm command for windows powershell
-    LDFLAGS = -lfreeglut -lglu32 -lopengl32
+    LDFLAGS =-L./include/ -lfreeglut -lglu32 -lSOIL -lopengl32
 else
 	# OS X
 	OS := $(shell uname)

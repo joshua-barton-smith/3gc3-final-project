@@ -26,6 +26,8 @@ https://stackoverflow.com/questions/874134/find-out-if-string-ends-with-another-
 https://github.com/syoyo/tinyobjloader - open-source library for loading obj files efficiently
 https://github.com/cxong/tinydir - open-source cross-platform library for iterating over files in a directory (which is somehow not provided in c++ at all until c++17??)
 
+http://www.lonesock.net/soil.html - library for loading images from regular file formats (PNG, JPG, BMP, etc.)
+
 ## Model sources
 https://sketchfab.com/3d-models/bed-403c4a48e5ea4a9fbbb9a096d90973af - bed.obj and related files
 https://sketchfab.com/3d-models/socks-3d79cc9684bd4c6094e1c0778e334ce4 - Sock.obj and related files
