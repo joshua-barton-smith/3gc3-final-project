@@ -397,8 +397,19 @@ void loadScenes() {
                         iss >> x >> y >> z >> xr >> yr >> zr >> scale;
                         Point3D pos = Point3D(x, y, z);
                         Point3D rot = Point3D(xr, yr, zr);
+                        // load texture
+                        std::string fname = first_token;
+                        fname.replace(fname.end()-4, fname.end(), "");
+                        fname = "models/" + fname + ".png";
+                        GLuint texture = SOIL_load_OGL_texture
+                        (
+                            fname.c_str(),
+                            SOIL_LOAD_AUTO,
+                            SOIL_CREATE_NEW_ID,
+                            SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
+                        );
                         // construct GameObject, with the mesh pointer passed from meshes map
-                        GameObject nobj = GameObject(meshes[first_token], pos, rot, scale, false, 0);
+                        GameObject nobj = GameObject(meshes[first_token], pos, rot, scale, false, texture);
                         objs.push_back(nobj);
                     } else if (second_token == "random") {
                         // base scale of the object, it gets randomized a little bit too
