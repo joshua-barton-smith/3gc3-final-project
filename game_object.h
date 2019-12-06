@@ -13,6 +13,7 @@
 
 #include "mathLib3D.h"
 #include "mesh.h"
+#include "material.h"
 
 class GameObject {
 public:
@@ -24,6 +25,8 @@ public:
 	virtual void logic(std::vector<GameObject> others, int idx);
 
 	bool check_collision(GameObject g);
+
+	bool line_intersects(Vec3D l, Vec3D l0, float *t);
 
 	Point3D position;
 	Point3D rotation;
@@ -39,6 +42,10 @@ public:
 	bool norender;
 
 	bool physics;
+
+	bool intersects;
+
+	Material cubemat;
 
 	Mesh *mesh;
 };

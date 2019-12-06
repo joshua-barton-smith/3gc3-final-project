@@ -28,7 +28,8 @@ Mesh::Mesh(tinyobj::attrib_t attribs, std::vector<tinyobj::shape_t> shapes, std:
 		float amb[4] = {mat.ambient[0], mat.ambient[1], mat.ambient[2], 1.0};
 		float diff[4] = {mat.diffuse[0], mat.diffuse[1], mat.diffuse[2], 1.0};
 		float spec[4] = {mat.specular[0], mat.specular[1], mat.specular[2], 1.0};
-		Material m = Material(amb, diff, spec, mat.shininess);
+		float emm[4] = {mat.emission[0], mat.emission[1], mat.emission[2], 1.0};
+		Material m = Material(amb, diff, spec, emm, mat.shininess);
 		this->materials.push_back(m);
 	}
 }

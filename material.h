@@ -4,13 +4,14 @@
 class Material {
 public:
 	Material();
-	Material(float *amb, float *diff, float *spec, float shin);
+	Material(float *amb, float *diff, float *spec, float *emm, float shin);
 
 	void bind();
 
 	float amb[4];
 	float diff[4];
 	float spec[4];
+	float emm[4];
 	float shin;
 };
 

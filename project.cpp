@@ -29,9 +29,11 @@
 #include <vector>
 #include <string>
 #include <iostream>
+#include <ctime>
+#include <ratio>
+#include <chrono>
 #include <sstream>
 #include <cstdlib>
-#include <ctime>
 #include <cmath>
 #include <algorithm>
 #include <map>
@@ -44,7 +46,11 @@ Camera camera = Camera(Vec3D(0.0, 2.0, 0.0), Vec3D(1.0, 2.0, 0.0));
 int screen_width = 600;
 int screen_height = 600;
 
-int timer = 60 * 60 * 10;
+// timer duration in ms = 30s
+int timer = 1000 * 60;
+
+// base time
+std::chrono::high_resolution_clock::time_point tb = std::chrono::high_resolution_clock::now();
 
 // movement inputs
 bool movement[] = {false, false, false, false};
@@ -60,6 +66,8 @@ std::map<std::string, Scene> scenes;
 float sceneBounds[] = {-6, 6, -1, 5, -6, 6};
 // material used by the walls/floor (should use a texture instead?)
 Material matBounds;
+
+std::string current_scene = "bedroom";  
 
 /**
 * Handles regular keyboard inputs (e.g. w/s/a/d for movement)
@@ -150,7 +158,7 @@ void drawHUD() {
     std::stringstream stream;
     stream << "(" << camera.camPos.mX << "," << camera.camPos.mY << "," << camera.camPos.mZ << ")" << std::endl;
     stream << "angles: " << camera.pitch << "," << camera.yaw << std::endl;
-    stream << "timer: " << (timer / (1000/17)) << std::endl;
+    stream << "timer: " << (timer / (1)) << "s" << std::endl;
 
     std::string output = stream.str();
 
@@ -174,6 +182,9 @@ void drawHUD() {
 
 // handle mouse
 void mouse(int button, int state, int x, int y) {
+    if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        
+    }
 }
 
 /**
@@ -260,13 +271,39 @@ void display()
     drawWalls();
 
     // render the scene, this includes all objects and lights making up the scene
-    scenes["bedroom"].render();
+    scenes[current_scene].render();
 
     // draw a 2d HUD
     drawHUD();
 
     // swap buffers
     glutSwapBuffers();
+}
+
+void checkIntersections() {
+    // cast a ray in the direction the camera is pointing.
+    // the vector camFront represents direction the camera is looking in
+    Vec3D camDir = Vec3D(camera.camFront.mX, camera.camFront.mY, camera.camFront.mZ).normalize();
+    // camPos is a point on the line drawn by the camera
+    Vec3D camPos = Vec3D(camera.camPos.mX, camera.camPos.mY, camera.camPos.mZ);
+
+    // run through the objects in the scene and test if this line intersects with them
+    // check collision with any game objects
+    size_t idx = -1;
+    for (size_t i = 0; i < scenes[current_scene].objs.size(); i++) {
+        float *t = new float;
+        float min_t = 100000000;
+        if (!scenes[current_scene].objs[i].norender & scenes[current_scene].objs[i].line_intersects(camDir, camPos, t)) {
+            if (*t < min_t) {
+                min_t = *t;
+                idx = i;
+            }
+        }
+        scenes[current_scene].objs[i].intersects = false;
+    }
+
+    if (idx != -1)
+        scenes[current_scene].objs[idx].intersects = true;
 }
 
 /**
@@ -284,25 +321,37 @@ void FPS(int val)
             camera.applyMovement(i, 0.1);
         }
     }
-    scenes["bedroom"].objs[0].position = Point3D(camera.camPos.mX, camera.camPos.mY, camera.camPos.mZ);
+    scenes[current_scene].objs[0].position = Point3D(camera.camPos.mX, camera.camPos.mY, camera.camPos.mZ);
     // check collision with any game objects
-    for (size_t i = 0; i < scenes["bedroom"].objs.size(); i++) {
+    for (size_t i = 0; i < scenes[current_scene].objs.size(); i++) {
         // logic step for each object making up the scene,
         // this will e.g. update their y position based on gravtiy
-        scenes["bedroom"].objs[i].logic(scenes["bedroom"].objs, i);
+        scenes[current_scene].objs[i].logic(scenes[current_scene].objs, i);
     }
 
-    for (size_t i = 1; i < scenes["bedroom"].objs.size(); i++) {
-        if (scenes["bedroom"].objs[i].check_collision(scenes["bedroom"].objs[0])) {
-            scenes["bedroom"].objs[0].position = Point3D(oldpos.mX, oldpos.mY, oldpos.mZ);
+    for (size_t i = 1; i < scenes[current_scene].objs.size(); i++) {
+        if (scenes[current_scene].objs[i].check_collision(scenes[current_scene].objs[0])) {
+            scenes[current_scene].objs[0].position = Point3D(oldpos.mX, oldpos.mY, oldpos.mZ);
             break;
         }
     }
 
-    camera.camPos = Vec3D(scenes["bedroom"].objs[0].position.mX, scenes["bedroom"].objs[0].position.mY, scenes["bedroom"].objs[0].position.mZ);
+    camera.camPos = Vec3D(scenes[current_scene].objs[0].position.mX, scenes[current_scene].objs[0].position.mY, scenes[current_scene].objs[0].position.mZ);
 
-    // reduce the timer
-    timer--;
+    checkIntersections();
+
+    if (timer > 0) {
+        // get current time
+        std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+        // sub from old frame time
+        std::chrono::duration<double, std::milli> time_span = t1 - tb;
+        // sub from timer
+        timer -= time_span.count();
+        // set tb
+        tb = std::chrono::high_resolution_clock::now();
+    } else {
+        timer = 0;
+    }
 
     glutPostRedisplay();
     glutTimerFunc(17, FPS, val);
@@ -443,12 +492,10 @@ void loadScenes() {
                             has_collided = false;
                             // generate random x, z position in (-5, 5)
                             float randX = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10))) - 5;
-                            // random rotation about y axis
-                            float randY = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/180)));
                             float randZ = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10))) - 5;
                             float randScale = ((static_cast <float> (rand()) / (static_cast <float> (RAND_MAX))) * 5) + 2.5;
                             // build the gameobject
-                            nobj = GameObject(meshes[first_token], Point3D(randX, 2, randZ), Point3D(0, randY, 0), base_scale * randScale, true, texture);
+                            nobj = GameObject(meshes[first_token], Point3D(randX, 2, randZ), Point3D(0, 0, 0), base_scale * randScale, true, texture);
                             // check collision with all other gameobjects
                             for (size_t i = 0; i < objs.size(); i++) {
                                 if (nobj.check_collision(objs[i])) has_collided = true;
@@ -560,7 +607,7 @@ int main(int argc, char** argv)
     floor.bounds[3] = 5;
     floor.bounds[4] = -0.99;
     floor.bounds[5] = 5;
-    scenes["bedroom"].objs.push_back(floor);
+    scenes[current_scene].objs.push_back(floor);
 
     // disable cursor (seems not to work on unix systems)
     glutSetCursor(GLUT_CURSOR_NONE);
@@ -569,9 +616,10 @@ int main(int argc, char** argv)
     float amb[4] = {0.3, 0.3, 0.3, 1.0};
     float diff[4] = {0.7, 0.7, 0.7, 1.0};
     float spec[4] = {1.0, 1.0, 1.0, 1.0};
+    float emm[4] = {0.0, 0.0, 0.0, 0.0};
     float shin = 100;
 
-    matBounds = Material(amb, diff, spec, shin);
+    matBounds = Material(amb, diff, spec, emm, shin);
 
     // set screen clear color to black
     glClearColor(0.0, 0.0, 0.0, 1.0);
@@ -600,6 +648,7 @@ int main(int argc, char** argv)
     glutTimerFunc(0, FPS, 0);
 
     // kick off main loop
+    tb = std::chrono::high_resolution_clock::now();
     glutMainLoop();
 
     return 0;
