@@ -62,11 +62,14 @@ std::map<std::string, Mesh*> meshes;
 // a map of all available scenes
 std::map<std::string, Scene> scenes;
 
+std::vector<int> goals;
+
 // these are the bounds for the walls/floor (minx, maxx, miny, maxy, minz, maxz)
-float sceneBounds[] = {-6, 6, -1, 5, -6, 6};
+float sceneBounds[] = {-6, 6, -1, 5, -6, 6, -4, -18};
 // material used by the walls/floor (should use a texture instead?)
 Material matBounds;
 
+// current scene to support multiple scenes
 std::string current_scene = "bedroom";  
 
 /**
@@ -89,6 +92,10 @@ void handleKeyboard(unsigned char key, int _x, int _y)
         }
         case 'd': {
             movement[CAMERA_STRAFE_RIGHT] = true;
+            break;
+        }
+        case ' ': {
+            if (scenes[current_scene].objs[0].grav == 0) scenes[current_scene].objs[0].grav = -0.1;
             break;
         }
         case 'q': {
@@ -158,7 +165,12 @@ void drawHUD() {
     std::stringstream stream;
     stream << "(" << camera.camPos.mX << "," << camera.camPos.mY << "," << camera.camPos.mZ << ")" << std::endl;
     stream << "angles: " << camera.pitch << "," << camera.yaw << std::endl;
-    stream << "timer: " << (timer / (1)) << "s" << std::endl;
+    stream << "timer: " << (timer / (1000.0)) << "s" << std::endl << std::endl;
+
+    stream << "Hints" << std::endl;
+    for (size_t i = 0; i < goals.size(); i++) {
+        stream << scenes[current_scene].objs[goals[i]].desc << std::endl;
+    }
 
     std::string output = stream.str();
 
@@ -176,6 +188,24 @@ void drawHUD() {
         glVertex3f(-0.02, 0.02, 1.0);
         glVertex3f(0.02, -0.02, 1.0);
     glEnd();
+
+    // render a win message?
+    if (goals.size() == 0 && timer > 0) {
+        std::string winner = "You Win!!!";
+        // color and position
+        glColor4f(1.0, 0.0, 0.0, 1.0);
+        glRasterPos2f(-0.2, 0);
+        // write string to screen
+        glutBitmapString(GLUT_BITMAP_HELVETICA_18, reinterpret_cast<const unsigned char*>(winner.c_str()));
+    } else if (timer == 0) {
+        std::string winner = "You Lose :(";
+        // color and position
+        glColor4f(1.0, 0.0, 0.0, 1.0);
+        glRasterPos2f(-0.2, 0);
+        // write string to screen
+        glutBitmapString(GLUT_BITMAP_HELVETICA_18, reinterpret_cast<const unsigned char*>(winner.c_str()));
+    }
+
     // re-enable lighting for the next render
     glEnable(GL_LIGHTING);
 }
@@ -183,7 +213,12 @@ void drawHUD() {
 // handle mouse
 void mouse(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
-        
+        for (size_t i = 0; i < scenes[current_scene].objs.size(); i++) {
+            if (scenes[current_scene].objs[i].intersects) {
+                // remove from the vector if it exists
+                goals.erase(std::remove(goals.begin(), goals.end(), i), goals.end());
+            }
+        }
     }
 }
 
@@ -226,8 +261,8 @@ void drawWalls() {
     glBegin(GL_QUADS);
         glNormal3f(1, 0, 0);
         glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[5]);
-        glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[4]);
-        glVertex3f(sceneBounds[0], sceneBounds[3], sceneBounds[4]);
+        glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[6]);
+        glVertex3f(sceneBounds[0], sceneBounds[3], sceneBounds[6]);
         glVertex3f(sceneBounds[0], sceneBounds[3], sceneBounds[5]);
     glEnd();
 
@@ -253,6 +288,56 @@ void drawWalls() {
         glVertex3f(sceneBounds[1], sceneBounds[1], sceneBounds[5]);
         glVertex3f(sceneBounds[1], sceneBounds[2], sceneBounds[5]);
         glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[5]);
+    glEnd();
+
+
+//second room
+    glBegin(GL_QUADS);
+    glNormal3f(0, 1, 0);
+        glVertex3f(sceneBounds[7], sceneBounds[2], sceneBounds[5]);
+        glVertex3f(sceneBounds[1], sceneBounds[2], sceneBounds[5]);
+        glVertex3f(sceneBounds[1], sceneBounds[2], sceneBounds[4]);
+        glVertex3f(sceneBounds[7], sceneBounds[2], sceneBounds[4]);
+    glEnd();
+
+    glBegin(GL_QUADS);
+        glNormal3f(0, -1, 0);
+        glVertex3f(sceneBounds[7], sceneBounds[3], sceneBounds[4]);
+        glVertex3f(sceneBounds[0], sceneBounds[3], sceneBounds[4]);
+        glVertex3f(sceneBounds[0], sceneBounds[3], sceneBounds[5]);
+        glVertex3f(sceneBounds[7], sceneBounds[3], sceneBounds[5]);
+    glEnd();
+
+    glBegin(GL_QUADS);
+        glNormal3f(1, 0, 0);
+        glVertex3f(sceneBounds[7], sceneBounds[2], sceneBounds[5]);
+        glVertex3f(sceneBounds[7], sceneBounds[2], sceneBounds[4]);
+        glVertex3f(sceneBounds[7], sceneBounds[3], sceneBounds[4]);
+        glVertex3f(sceneBounds[7], sceneBounds[3], sceneBounds[5]);
+    glEnd();
+    glBegin(GL_QUADS);
+        glNormal3f(-1, 0, 0);
+        glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[5]);
+        glVertex3f(sceneBounds[0], sceneBounds[3], sceneBounds[5]);
+        glVertex3f(sceneBounds[0], sceneBounds[3], sceneBounds[6]);
+        glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[6]);
+    glEnd();
+
+
+    glBegin(GL_QUADS);
+        glNormal3f(0, 0, -1);
+        glVertex3f(sceneBounds[7], sceneBounds[2], sceneBounds[4]);
+        glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[4]);
+        glVertex3f(sceneBounds[0], sceneBounds[1], sceneBounds[4]);
+        glVertex3f(sceneBounds[7], sceneBounds[1], sceneBounds[4]);
+    glEnd();
+
+    glBegin(GL_QUADS);
+        glNormal3f(0, 0, 1);
+        glVertex3f(sceneBounds[7], sceneBounds[1], sceneBounds[5]);
+        glVertex3f(sceneBounds[0], sceneBounds[1], sceneBounds[5]);
+        glVertex3f(sceneBounds[0], sceneBounds[2], sceneBounds[5]);
+        glVertex3f(sceneBounds[7], sceneBounds[2], sceneBounds[5]);
     glEnd();
 }
 
@@ -340,7 +425,7 @@ void FPS(int val)
 
     checkIntersections();
 
-    if (timer > 0) {
+    if (timer > 0 && goals.size() != 0) {
         // get current time
         std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
         // sub from old frame time
@@ -349,7 +434,7 @@ void FPS(int val)
         timer -= time_span.count();
         // set tb
         tb = std::chrono::high_resolution_clock::now();
-    } else {
+    } else if (timer <= 0) {
         timer = 0;
     }
 
@@ -364,6 +449,59 @@ bool endswith (std::string const &fullString, std::string const &ending) {
     } else {
         return false;
     }
+}
+
+void setbound(std::vector<GameObject> *objs){
+
+    GameObject floor = GameObject(Point3D(0, 0, 0), Point3D(0, 0, 0), 1.0, false, false, 0, "", "");
+    floor.bounds[0] = -18;
+    floor.bounds[1] = -1;
+    floor.bounds[2] = -6;
+    floor.bounds[3] = 6;
+    floor.bounds[4] = -0.99;
+    floor.bounds[5] = 6;
+    objs->push_back(floor);
+    GameObject wall1 = GameObject(Point3D(0, 2, 6), Point3D(0, 0, 0), 1.0, false, false, 0, "", "");
+    wall1.bounds[0] = -18;
+    wall1.bounds[1] = -3;
+    wall1.bounds[2] = 0.002;
+    wall1.bounds[3] = 6;
+    wall1.bounds[4] = 3;
+    wall1.bounds[5] = 0.001;
+    objs->push_back(wall1);
+
+    GameObject wall2= GameObject(Point3D(6,2,0), Point3D(0, 0, 0), 1.0, false, false, 0, "", "");
+    wall2.bounds[0] = 0.002;
+    wall2.bounds[1] = -3;
+    wall2.bounds[2] = -6;
+    wall2.bounds[3] = 0.001;
+    wall2.bounds[4] = 3;
+    wall2.bounds[5] = 6;
+    objs->push_back(wall2);
+    GameObject wall3 = GameObject(Point3D(0, 2, -6), Point3D(0, 0, 0), 1.0, false, false, 0, "", "");
+    wall3.bounds[0] = -18;
+    wall3.bounds[1] = -3;
+    wall3.bounds[2] = 0.002;
+    wall3.bounds[3] = 6;
+    wall3.bounds[4] = 3;
+    wall3.bounds[5] = 0.001;
+    objs->push_back(wall3);
+    GameObject wall4 = GameObject(Point3D(-6, 2, 1), Point3D(0, 0, 0), 1.0, false, false, 0, "", "");
+    wall4.bounds[0] = 0.002;
+    wall4.bounds[1] = -3;
+    wall4.bounds[2] = -5;
+    wall4.bounds[3] = 0.001;
+    wall4.bounds[4] = 3;
+    wall4.bounds[5] = 5;
+    objs->push_back(wall4);
+    GameObject wall5 = GameObject(Point3D(-18, 2, 0), Point3D(0, 0, 0), 1.0, false, false, 0, "", "");
+    wall5.bounds[0] = 0.002;
+    wall5.bounds[1] = -3;
+    wall5.bounds[2] = -5;
+    wall5.bounds[3] = 0.001;
+    wall5.bounds[4] = 3;
+    wall5.bounds[5] = 5;
+    objs->push_back(wall5);
 }
 
 // reads all the scene files from the scenes/ directory
@@ -396,7 +534,7 @@ void loadScenes() {
 
             // construct an object to represent the camera with.
             // camera will always have index 0 in objs.
-            GameObject cam = GameObject(Point3D(0, 2, 0), Point3D(0, 0, 0), 1.0, false, true, 0);
+            GameObject cam = GameObject(Point3D(0, 2, 0), Point3D(0, 0, 0), 1.0, false, true, 0, "camera", "");
             cam.bounds[0] = -0.3;
             cam.bounds[1] = -2.0;
             cam.bounds[2] = -0.3;
@@ -404,6 +542,8 @@ void loadScenes() {
             cam.bounds[4] = 2.0;
             cam.bounds[5] = 0.3;
             objs.insert(objs.begin(), cam);
+
+            setbound(&objs);
 
             // loop over each line in the file
             while(std::getline(infile, line)) {
@@ -458,12 +598,21 @@ void loadScenes() {
                             SOIL_FLAG_MIPMAPS | SOIL_FLAG_INVERT_Y | SOIL_FLAG_NTSC_SAFE_RGB | SOIL_FLAG_COMPRESS_TO_DXT
                         );
                         // construct GameObject, with the mesh pointer passed from meshes map
-                        GameObject nobj = GameObject(meshes[first_token], pos, rot, scale, false, texture);
+                        GameObject nobj = GameObject(meshes[first_token], pos, rot, scale, false, texture, first_token, "");
                         objs.push_back(nobj);
                     } else if (second_token == "random") {
                         // base scale of the object, it gets randomized a little bit too
                         float base_scale;
                         iss >> base_scale;
+                        int num_words;
+                        iss >> num_words;
+                        // grab all words from the strings
+                        std::string desc = "";
+                        std::string word;
+                        for (int i = 0; i < num_words; i++) {
+                            iss >> word;
+                            desc = desc + " " + word;
+                        }
                         // bc the spawn position is random, the objects might have been spawned within another object.
                         // if this is the case we want to re-generate a position.
                         // so we need a while loop to keep producing new random positions, until no collision occurs
@@ -490,12 +639,13 @@ void loadScenes() {
                         while (has_collided) {
                             // set flag to false to break the loop if no collision found
                             has_collided = false;
-                            // generate random x, z position in (-5, 5)
-                            float randX = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10))) - 5;
+                            // x position can be anything between -18 and 6
+                            // z position can be anything between -6 and 6
+                            float randX = sceneBounds[7] + static_cast <float> (rand()) /( static_cast <float> (RAND_MAX/(sceneBounds[1]-sceneBounds[7])));
                             float randZ = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX/10))) - 5;
                             float randScale = ((static_cast <float> (rand()) / (static_cast <float> (RAND_MAX))) * 5) + 2.5;
                             // build the gameobject
-                            nobj = GameObject(meshes[first_token], Point3D(randX, 2, randZ), Point3D(0, 0, 0), base_scale * randScale, true, texture);
+                            nobj = GameObject(meshes[first_token], Point3D(randX, 2, randZ), Point3D(0, 0, 0), base_scale * randScale, true, texture, first_token, desc);
                             // check collision with all other gameobjects
                             for (size_t i = 0; i < objs.size(); i++) {
                                 if (nobj.check_collision(objs[i])) has_collided = true;
@@ -570,6 +720,16 @@ void loadModels() {
     tinydir_close(&dir);
 }
 
+// adds some objects into a list as goals to find
+void loadGoals() {
+    for (size_t i = 0; i < scenes[current_scene].objs.size(); i++) {
+        float randn = (static_cast <float> (rand()) / (static_cast <float> (RAND_MAX)));
+        if (scenes[current_scene].objs[i].random && (randn < 0.1) && std::find(goals.begin(), goals.end(), i) == goals.end()) {
+            goals.push_back(i);
+        } 
+    }
+}
+
 int main(int argc, char** argv)
 {
     // we want to display a menu before showing a scene so that user can select the scene to play
@@ -595,19 +755,11 @@ int main(int argc, char** argv)
     glutCreateWindow("3GC3 Final Project");
 
     // loads all the scenes into a map
+    // ideally this would be before the window creation but we need a gl context to load textures :(
     loadScenes();
 
-    // this is just a gameobject representation of the floor,
-    // it would be much better to have a proper mesh for the floor instead
-    // of hardcoding this and hardcoding the walls
-    GameObject floor = GameObject(Point3D(0, 0, 0), Point3D(0, 0, 0), 1.0, false, false, 0);
-    floor.bounds[0] = -5;
-    floor.bounds[1] = -1;
-    floor.bounds[2] = -5;
-    floor.bounds[3] = 5;
-    floor.bounds[4] = -0.99;
-    floor.bounds[5] = 5;
-    scenes[current_scene].objs.push_back(floor);
+    // select objects in the scene to make up the goal list
+    while(goals.size() < 4) loadGoals();
 
     // disable cursor (seems not to work on unix systems)
     glutSetCursor(GLUT_CURSOR_NONE);

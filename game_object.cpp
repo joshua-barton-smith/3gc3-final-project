@@ -14,10 +14,11 @@
 #include "material.h"
 
 #include <iostream>
+#include <string>
 
 GameObject::GameObject() {}
 
-GameObject::GameObject(Point3D position, Point3D rotation, float scale, bool random, bool physics, GLuint texture) {
+GameObject::GameObject(Point3D position, Point3D rotation, float scale, bool random, bool physics, GLuint texture, std::string name, std::string desc) {
 	this->position = position;
 	this->rotation = rotation;
 	this->scale = scale;
@@ -33,11 +34,13 @@ GameObject::GameObject(Point3D position, Point3D rotation, float scale, bool ran
 	float emm[4] = {0.0, 0.0, 1.0, 1.0};
 	float shin = 100.0;
 	this->cubemat = Material(amb, diff, spec, emm, shin);
+	this->name = name;
+	this->desc = desc;
 }
 
 // need a way to find size of the object for checking what object is being interacted with
 // we can check within a range of the object so it doesnt have to be super precise.
-GameObject::GameObject(Mesh *mesh, Point3D position, Point3D rotation, float scale, bool random, GLuint texture) {
+GameObject::GameObject(Mesh *mesh, Point3D position, Point3D rotation, float scale, bool random, GLuint texture, std::string name, std::string desc) {
 	this->mesh = mesh;
 	this->position = position;
 	this->rotation = rotation;
@@ -61,6 +64,8 @@ GameObject::GameObject(Mesh *mesh, Point3D position, Point3D rotation, float sca
 	float emm[4] = {0.0, 0.0, 1.0, 1.0};
 	float shin = 100.0;
 	this->cubemat = Material(amb, diff, spec, emm, shin);
+	this->name = name;
+	this->desc = desc;
 }
 
 void GameObject::render() {
@@ -143,6 +148,13 @@ void GameObject::render() {
 
 void GameObject::logic(std::vector<GameObject> others, int idx) {
 	Point3D oldpos = Point3D(this->position.mX, this->position.mY, this->position.mZ);
+	// this is a cheat, to stop things falling through the floor.
+	// if something is below the floor, set y pos to 0.
+	if (oldpos.mY < -4) {
+		oldpos.mY = 0;
+		this->position.mY = 0;
+		this->grav = 0;
+	}
 	if (physics) {
 		// apply gravity
 		this->grav += 0.0098;
@@ -170,6 +182,7 @@ bool GameObject::check_collision(GameObject g) {
 }
 
 bool GameObject::line_intersects(Vec3D l, Vec3D l0, float *t) {
+	if(!(this->random)) return false;
 	Vec3D dirfrac = Vec3D(1.0f/l.mX, 1.0f/l.mY, 1.0f/l.mZ);
 
 	Point3D lb = Point3D(this->position.mX + this->bounds[0], this->position.mY + this->bounds[1], this->position.mZ + this->bounds[2]);

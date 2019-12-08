@@ -15,11 +15,13 @@
 #include "mesh.h"
 #include "material.h"
 
+#include <string>
+
 class GameObject {
 public:
 	GameObject();
-	GameObject(Point3D position, Point3D rotation, float scale, bool random, bool physics, GLuint texture);
-	GameObject(Mesh *mesh, Point3D position, Point3D rotation, float scale, bool random, GLuint texture);
+	GameObject(Point3D position, Point3D rotation, float scale, bool random, bool physics, GLuint texture, std::string name, std::string desc);
+	GameObject(Mesh *mesh, Point3D position, Point3D rotation, float scale, bool random, GLuint texture, std::string name, std::string desc);
 
 	void render();
 	virtual void logic(std::vector<GameObject> others, int idx);
@@ -27,6 +29,9 @@ public:
 	bool check_collision(GameObject g);
 
 	bool line_intersects(Vec3D l, Vec3D l0, float *t);
+
+	std::string name;
+	std::string desc;
 
 	Point3D position;
 	Point3D rotation;

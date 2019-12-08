@@ -2,33 +2,32 @@
 light 0 4.3 1.8 1 0.6 0.6 0.6 0.8 0.8 0.8 1.0 1.0 1.0
 
 # fixed-object setup: (obj name) fixed (pos x, y, z) (rotation x, y, z) (scale)
-# bed.obj fixed 4 2 4 0 -90 0 2
+bed.obj fixed 3.8 2 3.5 0 -90 0 1.6
 desk.obj fixed 5 0 -4.7 0 0 0 2
 computer.obj fixed 5 2.1 -4.78 0 -90 0 50
-# tower.obj fixed 5.1 1.83 -5.6 0 -90 0 0.015
 frame.obj fixed 4.8 2.1 -3.9 0 135 0 0.1
-closet.obj fixed -4.7 1 -4.5 0 90 0 5.2
+closet.obj fixed -4.7 1 2.0 0 90 0 5.2
 lamp.obj fixed 4.8 0 1 0 0 0 10
-# random-object setup: (obj name) random (base scale)
-Sock.obj random 0.02
-block_b.obj random 0.4
-baseball.obj random 1
-books.obj random 0.5
-block_5.obj random 0.4
-glove.obj random 0.5
-# backpack.obj random 0.4
-cowboy.obj random 1.3
-baseball_hat.obj random 1
-baseballGlove.obj random 1
-# bird_book.obj random 1
-block_k.obj random 0.4
-block_o.obj random 0.4
-blue_sneakers.obj random 0.3
-boxing_glove.obj random 1
-cube1.obj random 0.3
-doctor_bag.obj random 1
-knitted_hat.obj random 0.3
-notebook.obj random 0.2
-sienna_sneakers.obj random 0.4
-# snowshoes.obj random 0.5
-Sombrero.obj random 1
+# random-object setup: (obj name) random (base scale) (length of desc (words)) (desc)
+# Sock.obj random 0.02 1 Footwear
+block_b.obj random 0.4 3 Block with B
+baseball.obj random 1 2 Sports ball
+books.obj random 0.5 2 Stacked knowledge
+block_5.obj random 0.4 3 Block with 5
+glove.obj random 0.5 2 Warm hands
+backpack.obj random 0.4 3 Carries your things
+cowboy.obj random 1.3 2 Old-west hat
+baseball_hat.obj random 1 2 Sporty hat
+baseballGlove.obj random 1 3 Mitts for sports
+# bird_book.obj random 100 3 Book with birds
+block_k.obj random 0.4 3 Block with K
+block_o.obj random 0.4 3 Block with O
+blue_sneakers.obj random 0.3 2 Blue shoe
+boxing_glove.obj random 1 2 Punches things
+cube1.obj random 0.3 3 Block with 1
+doctor_bag.obj random 1 2 Medicine bag
+knitted_hat.obj random 0.3 2 Wooly hat
+notebook.obj random 0.2 3 Write stuff down
+sienna_sneakers.obj random 0.4 2 Fashion item
+snowshoes.obj random 0.5 2 Snow shoes
+Sombrero.obj random 1 2 Festive hat
