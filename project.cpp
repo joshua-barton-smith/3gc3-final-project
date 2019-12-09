@@ -72,6 +72,12 @@ Material matBounds;
 // current scene to support multiple scenes
 std::string current_scene = "bedroom";  
 
+// show instructions?
+bool instructions = true;
+
+// text
+std::string text_instr = "Use the mouse to move the camera\nUse W/A/S/D to move\nHints for objects to look for will appear on the left\nClick on objects to find them within the time limit!\n\nClick anywhere to begin.";
+
 /**
 * Handles regular keyboard inputs (e.g. w/s/a/d for movement)
 */
@@ -213,6 +219,11 @@ void drawHUD() {
 // handle mouse
 void mouse(int button, int state, int x, int y) {
     if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+        if (instructions) {
+            tb = std::chrono::high_resolution_clock::now();
+            instructions = false;
+            return;
+        }
         for (size_t i = 0; i < scenes[current_scene].objs.size(); i++) {
             if (scenes[current_scene].objs[i].intersects) {
                 // remove from the vector if it exists
@@ -346,20 +357,41 @@ void drawWalls() {
 */
 void display()
 {
-    // set up camera perspective and point it at the looking point
-    camera.setupPerspective();
-    // clear screen
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    camera.lookAt();
+    if (!instructions) {
+        // set up camera perspective and point it at the looking point
+        camera.setupPerspective();
+        // clear screen
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        camera.lookAt();
 
-    // draws the bounds of the scene
-    drawWalls();
+        // draws the bounds of the scene
+        drawWalls();
 
-    // render the scene, this includes all objects and lights making up the scene
-    scenes[current_scene].render();
+        // render the scene, this includes all objects and lights making up the scene
+        scenes[current_scene].render();
 
-    // draw a 2d HUD
-    drawHUD();
+        // draw a 2d HUD
+        drawHUD();
+    } else {
+        // disable lighting so the text always stays full colored
+        glDisable(GL_LIGHTING);
+        // clear screen
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+        // reset matrices so the 3d view is not affecting
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        // setup 2d ortho perspective
+        gluOrtho2D(-1, 1, -1, 1);
+        glMatrixMode(GL_MODELVIEW);
+
+        // color and position
+        glColor4f(1.0, 0.0, 0.0, 1.0);
+        glRasterPos2f(-1, 0.9);
+        // write string to screen
+        glutBitmapString(GLUT_BITMAP_HELVETICA_18, reinterpret_cast<const unsigned char*>(text_instr.c_str()));
+    }
 
     // swap buffers
     glutSwapBuffers();
@@ -396,46 +428,48 @@ void checkIntersections() {
 */
 void FPS(int val)
 {
-    // applies rotations
-    camera.applyRotation();
-    // save the camera position
-    Point3D oldpos = Point3D(camera.camPos.mX, camera.camPos.mY, camera.camPos.mZ);
-    // apply movement for each of the input keys
-    for (int i = 0; i < 4; i++) {
-        if (movement[i]) {
-            camera.applyMovement(i, 0.1);
+    if (!instructions) {
+        // applies rotations
+        camera.applyRotation();
+        // save the camera position
+        Point3D oldpos = Point3D(camera.camPos.mX, camera.camPos.mY, camera.camPos.mZ);
+        // apply movement for each of the input keys
+        for (int i = 0; i < 4; i++) {
+            if (movement[i]) {
+                camera.applyMovement(i, 0.1);
+            }
         }
-    }
-    scenes[current_scene].objs[0].position = Point3D(camera.camPos.mX, camera.camPos.mY, camera.camPos.mZ);
-    // check collision with any game objects
-    for (size_t i = 0; i < scenes[current_scene].objs.size(); i++) {
-        // logic step for each object making up the scene,
-        // this will e.g. update their y position based on gravtiy
-        scenes[current_scene].objs[i].logic(scenes[current_scene].objs, i);
-    }
-
-    for (size_t i = 1; i < scenes[current_scene].objs.size(); i++) {
-        if (scenes[current_scene].objs[i].check_collision(scenes[current_scene].objs[0])) {
-            scenes[current_scene].objs[0].position = Point3D(oldpos.mX, oldpos.mY, oldpos.mZ);
-            break;
+        scenes[current_scene].objs[0].position = Point3D(camera.camPos.mX, camera.camPos.mY, camera.camPos.mZ);
+        // check collision with any game objects
+        for (size_t i = 0; i < scenes[current_scene].objs.size(); i++) {
+            // logic step for each object making up the scene,
+            // this will e.g. update their y position based on gravtiy
+            scenes[current_scene].objs[i].logic(scenes[current_scene].objs, i);
         }
-    }
 
-    camera.camPos = Vec3D(scenes[current_scene].objs[0].position.mX, scenes[current_scene].objs[0].position.mY, scenes[current_scene].objs[0].position.mZ);
+        for (size_t i = 1; i < scenes[current_scene].objs.size(); i++) {
+            if (scenes[current_scene].objs[i].check_collision(scenes[current_scene].objs[0])) {
+                scenes[current_scene].objs[0].position = Point3D(oldpos.mX, oldpos.mY, oldpos.mZ);
+                break;
+            }
+        }
 
-    checkIntersections();
+        camera.camPos = Vec3D(scenes[current_scene].objs[0].position.mX, scenes[current_scene].objs[0].position.mY, scenes[current_scene].objs[0].position.mZ);
 
-    if (timer > 0 && goals.size() != 0) {
-        // get current time
-        std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
-        // sub from old frame time
-        std::chrono::duration<double, std::milli> time_span = t1 - tb;
-        // sub from timer
-        timer -= time_span.count();
-        // set tb
-        tb = std::chrono::high_resolution_clock::now();
-    } else if (timer <= 0) {
-        timer = 0;
+        checkIntersections();
+
+        if (timer > 0 && goals.size() != 0) {
+            // get current time
+            std::chrono::high_resolution_clock::time_point t1 = std::chrono::high_resolution_clock::now();
+            // sub from old frame time
+            std::chrono::duration<double, std::milli> time_span = t1 - tb;
+            // sub from timer
+            timer -= time_span.count();
+            // set tb
+            tb = std::chrono::high_resolution_clock::now();
+        } else if (timer <= 0) {
+            timer = 0;
+        }
     }
 
     glutPostRedisplay();
